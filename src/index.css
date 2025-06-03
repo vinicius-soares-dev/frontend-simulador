@@ -1,0 +1,18 @@
+/* src/index.css ou src/styles/tailwind.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+}
