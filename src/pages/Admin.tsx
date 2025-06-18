@@ -57,7 +57,8 @@ const modulosFiltrados = cursos.filter(curso => curso.categoriaId === categoriaI
   fetchCategoriasECursos();
 }, []);
 
-
+console.log(escolas);
+console.log(escolaId);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -113,30 +114,44 @@ const modulosFiltrados = cursos.filter(curso => curso.categoriaId === categoriaI
 
     try {
 
-      const response = await fetch('https://portalaeronauta.com/questoes/upload-questoes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ questoes: questoesConvertidas, cursoId }),
-      });
+    const response = await fetch('https://portalaeronauta.com/questoes/upload-questoes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ questoes: questoesConvertidas, cursoId }),
+    });
 
-      if (!response.ok) {
-        throw new Error('Erro ao importar as questões');
-      }
+    // 1) Parser do JSON
+    const data = await response.json();
 
-      setFeedback({ type: 'success', message: 'Questões importadas com sucesso!' });
+    // 2) Se status não OK ou nenhum registro criado → erro
+    if (!response.ok || data.created === 0) {
+      throw new Error(
+        data.message ||
+        'Nenhuma questão foi inserida. Verifique duplicatas ou formato.'
+      );
+    }
+
+    // 3) Sucesso real: exibe quantas entraram
+    setFeedback({
+      type: 'success',
+      message: `${data.created} questões importadas com sucesso!`
+    });
+
 
       const novasQuestoes = questoes.slice(0, 5).map((q, idx) => `${idx + 1}. ${q.pergunta}`);
       setUltimasQuestoes(novasQuestoes);
 
       setFile(null);
       setQuestoes([]);
-    } catch (error: any) {
-      setFeedback({ type: 'error', message: error.message || 'Erro ao importar' });
-    } finally {
-    setIsUploading(false); 
-  }
+    }catch (error: any) {
+      setFeedback({
+        type: 'error',
+        message: error.message || 'Erro ao importar as questões.'
+      });
+    }
+    finally {
+      setIsUploading(false); 
+    }
   };
 
 const handleCreateCurso = async () => {
